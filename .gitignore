@@ -4,9 +4,11 @@ obj/
 
 # Publish outputs intermediarios (gerados pelo script)
 src/PrinterScanner.Installer/embedded-app/
+src/PrinterManager.Installer/embedded-app/
 
 # Instalador final (grande demais para git - gerar com publish-installer.ps1)
 publish/win-x64-installer/
+publish/gestao-*/
 
 # Editor / IDE
 .vs/

@@ -1,0 +1,105 @@
+<UserControl x:Class="PrinterManager.App.Views.DiscoveryView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <DockPanel>
+        <Border DockPanel.Dock="Top" Style="{StaticResource Card}" Margin="0,0,0,10">
+            <StackPanel>
+                <WrapPanel>
+                    <StackPanel Margin="0,0,12,0">
+                        <TextBlock Text="Modo" Style="{StaticResource Muted}" />
+                        <ComboBox ItemsSource="{Binding Modes}" SelectedItem="{Binding Mode}" Width="100" AutomationProperties.Name="Modo de varredura" />
+                    </StackPanel>
+                    <StackPanel Margin="0,0,12,0" Orientation="Horizontal" Visibility="{Binding IsRangeMode, Converter={StaticResource BoolToVisibility}}">
+                        <StackPanel Margin="0,0,12,0">
+                            <TextBlock Text="IP inicial" Style="{StaticResource Muted}" />
+                            <TextBox Text="{Binding StartIp}" Width="130" AutomationProperties.Name="IP inicial" />
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock Text="IP final" Style="{StaticResource Muted}" />
+                            <TextBox Text="{Binding EndIp}" Width="130" AutomationProperties.Name="IP final" />
+                        </StackPanel>
+                    </StackPanel>
+                    <StackPanel Margin="0,0,12,0" Visibility="{Binding IsRangeMode, Converter={StaticResource InverseBoolToVisibility}}">
+                        <TextBlock Text="Rede (CIDR)" Style="{StaticResource Muted}" />
+                        <TextBox Text="{Binding Cidr}" Width="160" AutomationProperties.Name="Rede em notação CIDR" />
+                    </StackPanel>
+                    <StackPanel Margin="0,0,12,0">
+                        <TextBlock Text="SNMP" Style="{StaticResource Muted}" />
+                        <ComboBox ItemsSource="{Binding SnmpVersions}" SelectedValuePath="Value" DisplayMemberPath="Text"
+                                  SelectedValue="{Binding Version}" Width="110" AutomationProperties.Name="Versão SNMP" />
+                    </StackPanel>
+                    <StackPanel Margin="0,0,12,0" Visibility="{Binding IsV3, Converter={StaticResource InverseBoolToVisibility}}">
+                        <TextBlock Text="Comunidade" Style="{StaticResource Muted}" />
+                        <TextBox Text="{Binding Community}" Width="120" AutomationProperties.Name="Comunidade SNMP" />
+                    </StackPanel>
+                    <StackPanel Margin="0,0,12,0">
+                        <TextBlock Text="Setor para as novas (opcional)" Style="{StaticResource Muted}" />
+                        <TextBox Text="{Binding DefaultSector}" Width="180" AutomationProperties.Name="Setor padrão" />
+                    </StackPanel>
+                </WrapPanel>
+
+                <WrapPanel Margin="0,8,0,0" Visibility="{Binding IsV3, Converter={StaticResource BoolToVisibility}}">
+                    <StackPanel Margin="0,0,12,0">
+                        <TextBlock Text="Usuário v3" Style="{StaticResource Muted}" />
+                        <TextBox Text="{Binding V3User}" Width="130" AutomationProperties.Name="Usuário SNMPv3" />
+                    </StackPanel>
+                    <StackPanel Margin="0,0,12,0">
+                        <TextBlock Text="Autenticação" Style="{StaticResource Muted}" />
+                        <ComboBox ItemsSource="{Binding AuthProtocols}" SelectedValuePath="Value" DisplayMemberPath="Text"
+                                  SelectedValue="{Binding V3Auth}" Width="140" AutomationProperties.Name="Protocolo de autenticação" />
+                    </StackPanel>
+                    <StackPanel Margin="0,0,12,0">
+                        <TextBlock Text="Senha autenticação" Style="{StaticResource Muted}" />
+                        <PasswordBox x:Name="AuthPassword" Width="140" PasswordChanged="AuthPassword_Changed" AutomationProperties.Name="Senha de autenticação" />
+                    </StackPanel>
+                    <StackPanel Margin="0,0,12,0">
+                        <TextBlock Text="Criptografia" Style="{StaticResource Muted}" />
+                        <ComboBox ItemsSource="{Binding PrivProtocols}" SelectedValuePath="Value" DisplayMemberPath="Text"
+                                  SelectedValue="{Binding V3Priv}" Width="140" AutomationProperties.Name="Protocolo de criptografia" />
+                    </StackPanel>
+                    <StackPanel Margin="0,0,12,0">
+                        <TextBlock Text="Senha criptografia" Style="{StaticResource Muted}" />
+                        <PasswordBox x:Name="PrivPassword" Width="140" PasswordChanged="PrivPassword_Changed" AutomationProperties.Name="Senha de criptografia" />
+                    </StackPanel>
+                    <StackPanel Margin="0,0,12,0">
+                        <TextBlock Text="Contexto" Style="{StaticResource Muted}" />
+                        <TextBox Text="{Binding V3Context}" Width="110" AutomationProperties.Name="Contexto SNMPv3" />
+                    </StackPanel>
+                </WrapPanel>
+
+                <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                    <Button Content="Iniciar varredura" Command="{Binding StartCommand}" Style="{StaticResource PrimaryButton}" />
+                    <Button Content="Cancelar" Command="{Binding CancelCommand}" />
+                </StackPanel>
+                <ProgressBar Value="{Binding Progress, Mode=OneWay}" Height="8" Margin="0,12,0,4" Maximum="100" AutomationProperties.Name="Progresso da varredura" />
+                <TextBlock Text="{Binding ProgressText}" Style="{StaticResource Muted}" AutomationProperties.LiveSetting="Polite" />
+            </StackPanel>
+        </Border>
+
+        <DockPanel DockPanel.Dock="Bottom" Margin="0,10,0,0">
+            <Button Content="Cadastrar selecionadas" Command="{Binding AddSelectedCommand}" Style="{StaticResource PrimaryButton}" />
+            <Button Content="Marcar todas" Command="{Binding SelectAllCommand}" />
+            <Button Content="Desmarcar" Command="{Binding SelectNoneCommand}" />
+            <TextBlock />
+        </DockPanel>
+
+        <DataGrid ItemsSource="{Binding Results}" IsReadOnly="False" AutomationProperties.Name="Impressoras encontradas">
+            <DataGrid.Columns>
+                <DataGridTemplateColumn Header="" Width="40">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <CheckBox IsChecked="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding CanSelect}"
+                                      HorizontalAlignment="Center" AutomationProperties.Name="{Binding IpAddress, StringFormat=Selecionar {0}}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn Header="IP" Binding="{Binding IpAddress}" Width="120" IsReadOnly="True" />
+                <DataGridTextColumn Header="Nome" Binding="{Binding Name}" Width="*" IsReadOnly="True" />
+                <DataGridTextColumn Header="Modelo" Binding="{Binding Model}" Width="*" IsReadOnly="True" />
+                <DataGridTextColumn Header="Série" Binding="{Binding SerialNumber}" Width="130" IsReadOnly="True" />
+                <DataGridTextColumn Header="Situação" Binding="{Binding Situation}" Width="110" IsReadOnly="True" />
+                <DataGridTextColumn Header="Descrição SNMP" Binding="{Binding SysDescription}" Width="2*" IsReadOnly="True" />
+            </DataGrid.Columns>
+        </DataGrid>
+    </DockPanel>
+</UserControl>

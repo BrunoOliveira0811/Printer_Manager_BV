@@ -4,6 +4,15 @@
 
 Solução completa para descoberta, diagnóstico e gerenciamento de impressoras em ambientes corporativos. Ao abrir, já exibe as impressoras instaladas no computador; ao varrer, encontra novas na rede e permite alterar IP, gerenciar filas, instalar drivers e muito mais.
 
+### Aplicativos deste repositório
+
+| App | Para que serve | Projeto | Documentação |
+|---|---|---|---|
+| **Utilitário de Impressoras** (v3.0) | Descoberta, diagnóstico e ações pontuais: alterar IP, filas, spooler, drivers, USB | [`src/PrinterScanner.App`](src/PrinterScanner.App) | este README |
+| **Gestão de Impressoras** (v1.0) | Monitoramento contínuo do parque via SNMP: suprimentos, desgaste de peças, contadores (MPS), alertas, manutenções, relatórios e usuários | [`src/PrinterManager.App`](src/PrinterManager.App) | [seção abaixo](#gestão-de-impressoras) e [docs/gestao-impressoras.md](docs/gestao-impressoras.md) |
+
+Os dois são apps desktop WPF independentes, com instaladores próprios, e podem ser instalados na mesma máquina.
+
 ---
 
 ## Sumário
@@ -21,6 +30,7 @@ Solução completa para descoberta, diagnóstico e gerenciamento de impressoras 
 - [Colunas da grade de resultados](#colunas-da-grade-de-resultados)
 - [Dependências](#dependências)
 - [Privacidade e dados](#privacidade-e-dados)
+- [Gestão de Impressoras](#gestão-de-impressoras)
 
 ---
 
@@ -208,6 +218,7 @@ PROJETOS/
 ├── scripts/
 │   ├── publish-portable.ps1          # Gera o executável portátil
 │   ├── publish-installer.ps1         # Gera o instalador completo
+│   ├── publish-gestao-installer.ps1  # Gera o instalador do Gestão de Impressoras
 │   └── clean-cache.ps1               # Limpa caches de build
 └── src/
     ├── PrinterScanner.Launcher/      # Launcher self-contained
@@ -248,7 +259,17 @@ PROJETOS/
     │       ├── ChangeUsbPortViewModel.cs
     │       ├── DriverRequiredDialog.xaml # Aviso de driver necessário
     │       └── UtilitariosWindow.xaml    # Janela de utilitários
-    └── PrinterScanner.Installer/         # Projeto do instalador
+    ├── PrinterScanner.Installer/         # Projeto do instalador
+    ├── PrinterManager.App/               # Gestão de Impressoras (WPF + SQLite)
+    │   ├── Data/                         # DbContext EF Core e inicialização do banco
+    │   ├── Infrastructure/               # MVVM, comandos assíncronos, conversores
+    │   ├── Models/                       # Impressora, suprimento, peça, alerta, auditoria…
+    │   ├── Resources/                    # Tema, estilos e ícone
+    │   ├── Services/                     # SNMP, varredura agendada, alertas, notificações,
+    │   │                                 # relatórios, backup, auditoria e usuários
+    │   ├── ViewModels/
+    │   └── Views/                        # Painel, impressoras, descoberta, alertas, relatórios…
+    └── PrinterManager.Installer/         # Instalador do Gestão de Impressoras
 ```
 
 ---
@@ -291,6 +312,20 @@ publish\win-x64-portable\
 
 publish\win-x64-installer\
 └── PrinterScanner-Setup.exe    ← instalador completo (~72 MB)
+```
+
+### Gestão de Impressoras
+
+```powershell
+dotnet build src\PrinterManager.App\PrinterManager.App.csproj -c Release
+powershell -ExecutionPolicy Bypass -File scripts\publish-gestao-installer.ps1
+```
+
+Resultado:
+
+```
+publish\gestao-win-x64-installer\
+└── GestaoImpressoras-Setup.exe ← instalador (~45 MB; instala o .NET 8 Desktop Runtime se faltar)
 ```
 
 ---
@@ -388,6 +423,8 @@ Dados salvos em `%AppData%\PrinterScannerApp\`:
 |---|---|---|
 | `Lextm.SharpSnmpLib` | 12.5.7 | Consultas SNMP v1/v2c |
 
+As dependências do Gestão de Impressoras (SQLite/EF Core, bcrypt, QuestPDF, DPAPI) estão em [docs/gestao-impressoras.md](docs/gestao-impressoras.md#dependências).
+
 ---
 
 ## Privacidade e dados
@@ -399,4 +436,26 @@ Dados salvos em `%AppData%\PrinterScannerApp\`:
 
 ---
 
-*Desenvolvido por UP Tecnologias · v3.0*
+## Gestão de Impressoras
+
+App desktop separado para **acompanhar** o parque de impressoras no dia a dia, e não só configurá-lo:
+
+- **Painel** com a saúde de todas as impressoras, níveis CMYK, peça mais desgastada e alertas ativos
+- **Descoberta** por faixa de IP ou CIDR e **cadastro manual**, com teste de conexão (ping + SNMP)
+- **SNMP v1, v2c e v3** (autenticação MD5/SHA e criptografia DES/AES)
+- **Varredura automática** com intervalo mínimo de 15 minutos; a impressora fica *Offline* após 3 tentativas sem resposta
+- **Alertas** visuais e sonoros: toner ≤ 5% (crítico) e peça ≥ 90% da vida útil (preventivo), com limiares configuráveis
+- **Notificações** por e-mail (SMTP/TLS) e webhooks HTTPS (Teams, Slack, Service Desk)
+- **Peças de desgaste** (fusor, rolo de transferência, pickup) calculadas pelas páginas desde a última troca, com reset auditado
+- **Contadores** total/mono/cor guardados sem expurgo e **franquia mensal** fechada automaticamente no 1º dia útil
+- **Relatórios** em PDF e CSV: consumo de suprimentos, contadores, franquia e manutenções
+- **Usuários** com perfis Administrador, Técnico e Visualizador; senhas em bcrypt; bloqueio após 5 tentativas
+- **Auditoria imutável** (encadeada por hash) e **backup diário** com restauração
+
+Os dados ficam em `%ProgramData%\GestaoImpressoras` (banco SQLite compartilhado pelos usuários da máquina). Nada é enviado para fora, exceto as notificações que o administrador configurar.
+
+Perfis de acesso, observações técnicas e o mapeamento de cada requisito para o código estão em [docs/gestao-impressoras.md](docs/gestao-impressoras.md).
+
+---
+
+*Desenvolvido por UP Tecnologias · Utilitário v3.0 · Gestão de Impressoras v1.0*

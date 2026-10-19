@@ -1,0 +1,26 @@
+<UserControl x:Class="PrinterManager.App.Views.ReportsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <DockPanel>
+        <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,10">
+            <StackPanel Margin="0,0,12,0">
+                <TextBlock Text="Relatório" Style="{StaticResource Muted}" />
+                <ComboBox ItemsSource="{Binding Kinds}" SelectedValuePath="Value" DisplayMemberPath="Text" SelectedValue="{Binding Kind}" Width="230"
+                          AutomationProperties.Name="Tipo de relatório" />
+            </StackPanel>
+            <StackPanel Margin="0,0,12,0">
+                <TextBlock Text="De" Style="{StaticResource Muted}" />
+                <DatePicker SelectedDate="{Binding From}" Width="130" AutomationProperties.Name="Data inicial" />
+            </StackPanel>
+            <StackPanel Margin="0,0,12,0">
+                <TextBlock Text="Até" Style="{StaticResource Muted}" />
+                <DatePicker SelectedDate="{Binding To}" Width="130" AutomationProperties.Name="Data final" />
+            </StackPanel>
+            <Button Content="Gerar" Command="{Binding GenerateCommand}" Style="{StaticResource PrimaryButton}" VerticalAlignment="Bottom" />
+            <Button Content="Exportar PDF" Command="{Binding ExportPdfCommand}" VerticalAlignment="Bottom" />
+            <Button Content="Exportar CSV" Command="{Binding ExportCsvCommand}" VerticalAlignment="Bottom" />
+        </WrapPanel>
+        <TextBlock DockPanel.Dock="Top" Text="{Binding RowCountText}" Style="{StaticResource Muted}" Margin="0,0,0,6" />
+        <DataGrid ItemsSource="{Binding Table.DefaultView}" AutoGenerateColumns="True" AutomationProperties.Name="Resultado do relatório" />
+    </DockPanel>
+</UserControl>

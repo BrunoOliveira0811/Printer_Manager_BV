@@ -1,0 +1,35 @@
+<UserControl x:Class="PrinterManager.App.Views.MaintenanceView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <DockPanel>
+        <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,10">
+            <StackPanel Margin="0,0,12,0">
+                <TextBlock Text="Impressora" Style="{StaticResource Muted}" />
+                <ComboBox ItemsSource="{Binding Printers}" SelectedItem="{Binding SelectedPrinter}" DisplayMemberPath="DisplayName" Width="260"
+                          AutomationProperties.Name="Filtrar por impressora" />
+            </StackPanel>
+            <StackPanel Margin="0,0,12,0">
+                <TextBlock Text="De" Style="{StaticResource Muted}" />
+                <DatePicker SelectedDate="{Binding From}" Width="130" AutomationProperties.Name="Data inicial" />
+            </StackPanel>
+            <StackPanel Margin="0,0,12,0">
+                <TextBlock Text="Até" Style="{StaticResource Muted}" />
+                <DatePicker SelectedDate="{Binding To}" Width="130" AutomationProperties.Name="Data final" />
+            </StackPanel>
+            <Button Content="Filtrar" Command="{Binding RefreshCommand}" VerticalAlignment="Bottom" />
+            <Button Content="Registrar manutenção" Command="{Binding AddCommand}" Style="{StaticResource PrimaryButton}" VerticalAlignment="Bottom" />
+        </WrapPanel>
+        <DataGrid ItemsSource="{Binding Items}" AutomationProperties.Name="Histórico de manutenções">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Data" Binding="{Binding PerformedAt, Converter={StaticResource UtcToLocal}}" Width="120" />
+                <DataGridTextColumn Header="Impressora" Binding="{Binding Printer.DisplayName}" Width="*" MinWidth="160" />
+                <DataGridTextColumn Header="IP" Binding="{Binding Printer.IpAddress}" Width="110" />
+                <DataGridTextColumn Header="Tipo" Binding="{Binding Type, Converter={StaticResource EnumDescription}}" Width="160" />
+                <DataGridTextColumn Header="Peça" Binding="{Binding PartName}" Width="*" MinWidth="110" />
+                <DataGridTextColumn Header="Descrição" Binding="{Binding Description}" Width="2*" MinWidth="220" />
+                <DataGridTextColumn Header="Contador" Binding="{Binding CounterAtService, StringFormat=N0}" Width="90" />
+                <DataGridTextColumn Header="Responsável" Binding="{Binding UserName}" Width="110" />
+            </DataGrid.Columns>
+        </DataGrid>
+    </DockPanel>
+</UserControl>

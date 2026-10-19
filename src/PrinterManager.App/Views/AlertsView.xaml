@@ -1,0 +1,33 @@
+<UserControl x:Class="PrinterManager.App.Views.AlertsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <DockPanel>
+        <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,10">
+            <Button Content="Reconhecer alerta" Command="{Binding AcknowledgeCommand}" Style="{StaticResource PrimaryButton}" />
+            <Button Content="Abrir impressora" Command="{Binding OpenPrinterCommand}" />
+            <Button Content="Recarregar" Command="{Binding RefreshCommand}" />
+            <CheckBox Content="Incluir resolvidos (últimos 30 dias)" IsChecked="{Binding IncludeResolved}" VerticalAlignment="Center" Margin="8,0,0,0" />
+        </WrapPanel>
+        <DataGrid ItemsSource="{Binding Items}" SelectedItem="{Binding Selected}" AutomationProperties.Name="Alertas">
+            <DataGrid.Columns>
+                <DataGridTemplateColumn Header="Severidade" Width="100" SortMemberPath="Severity">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Severity, Converter={StaticResource EnumDescription}}" FontWeight="SemiBold"
+                                       Foreground="{Binding Severity, Converter={StaticResource SeverityToBrush}}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn Header="Tipo" Binding="{Binding Type, Converter={StaticResource EnumDescription}}" Width="140" />
+                <DataGridTextColumn Header="Impressora" Binding="{Binding Printer.Name}" Width="*" MinWidth="160" />
+                <DataGridTextColumn Header="IP" Binding="{Binding Printer.IpAddress}" Width="110" />
+                <DataGridTextColumn Header="Setor" Binding="{Binding Printer.Sector}" Width="110" />
+                <DataGridTextColumn Header="Mensagem" Binding="{Binding Message}" Width="3*" MinWidth="300" />
+                <DataGridTextColumn Header="Aberto em" Binding="{Binding CreatedAt, Converter={StaticResource UtcToLocal}}" Width="115" />
+                <DataGridTextColumn Header="Notificado" Binding="{Binding NotifiedAt, Converter={StaticResource UtcToLocal}}" Width="115" />
+                <DataGridTextColumn Header="Reconhecido por" Binding="{Binding AcknowledgedBy}" Width="110" />
+                <DataGridTextColumn Header="Resolvido em" Binding="{Binding ResolvedAt, Converter={StaticResource UtcToLocal}}" Width="115" />
+            </DataGrid.Columns>
+        </DataGrid>
+    </DockPanel>
+</UserControl>

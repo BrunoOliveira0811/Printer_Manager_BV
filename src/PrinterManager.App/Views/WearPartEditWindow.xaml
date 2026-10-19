@@ -1,0 +1,20 @@
+<Window x:Class="PrinterManager.App.Views.WearPartEditWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Peça de desgaste" Style="{StaticResource AppWindow}"
+        Width="420" SizeToContent="Height" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
+    <StackPanel Margin="20">
+        <TextBlock Text="Nome da peça" Style="{StaticResource FieldLabel}" />
+        <TextBox x:Name="NameBox" AutomationProperties.Name="Nome da peça" />
+        <TextBlock Text="Vida útil nominal (páginas, conforme fabricante)" Style="{StaticResource FieldLabel}" />
+        <TextBox x:Name="LifeBox" AutomationProperties.Name="Vida útil nominal em páginas" />
+        <TextBlock Text="Contador total da impressora na última troca" Style="{StaticResource FieldLabel}" />
+        <TextBox x:Name="CounterBox" AutomationProperties.Name="Contador na última troca" />
+        <TextBlock Text="Use o botão “Trocar / resetar” ao substituir a peça; edite aqui apenas para corrigir dados." Style="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,4,0,0" />
+        <CheckBox x:Name="ActiveBox" Content="Monitorar esta peça" Margin="0,10,0,0" />
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+            <Button Content="Cancelar" IsCancel="True" />
+            <Button Content="Salvar" IsDefault="True" Style="{StaticResource PrimaryButton}" Margin="0" Click="Save_Click" />
+        </StackPanel>
+    </StackPanel>
+</Window>

@@ -1,8 +1,12 @@
-Microsoft Visual Studio Solution File, Format Version 12.00
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrinterScanner.App", "src\PrinterScanner.App\PrinterScanner.App.csproj", "{7C8F10BE-2E0F-4B4B-A2E3-8A40B2AB8B6C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{D5787B2E-74E9-41AF-8B8A-211223499AA2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrinterManager.App", "src\PrinterManager.App\PrinterManager.App.csproj", "{BC4DC80B-5F18-427C-9EF9-2845F88C896F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -14,8 +18,15 @@ Global
 		{7C8F10BE-2E0F-4B4B-A2E3-8A40B2AB8B6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7C8F10BE-2E0F-4B4B-A2E3-8A40B2AB8B6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7C8F10BE-2E0F-4B4B-A2E3-8A40B2AB8B6C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BC4DC80B-5F18-427C-9EF9-2845F88C896F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BC4DC80B-5F18-427C-9EF9-2845F88C896F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BC4DC80B-5F18-427C-9EF9-2845F88C896F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BC4DC80B-5F18-427C-9EF9-2845F88C896F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{BC4DC80B-5F18-427C-9EF9-2845F88C896F} = {D5787B2E-74E9-41AF-8B8A-211223499AA2}
 	EndGlobalSection
 EndGlobal

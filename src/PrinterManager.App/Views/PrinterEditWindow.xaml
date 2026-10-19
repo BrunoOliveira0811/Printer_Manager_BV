@@ -1,0 +1,125 @@
+<Window x:Class="PrinterManager.App.Views.PrinterEditWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="{Binding WindowTitle}" Style="{StaticResource AppWindow}"
+        Width="760" Height="720" MinWidth="560" MinHeight="480"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
+    <DockPanel Margin="20">
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
+            <Button Content="Testar conexão" Click="Test_Click" ToolTip="Ping + leitura SNMP básica" />
+            <Button Content="Cancelar" IsCancel="True" />
+            <Button Content="Salvar" IsDefault="True" Style="{StaticResource PrimaryButton}" Margin="0" Click="Save_Click" />
+        </StackPanel>
+
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <TextBlock Text="Identificação" Style="{StaticResource SectionTitle}" />
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="16" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="Endereço IP *" Style="{StaticResource FieldLabel}" />
+                        <TextBox x:Name="IpBox" Text="{Binding IpAddress, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="Endereço IP" />
+                        <TextBlock Text="Nome" Style="{StaticResource FieldLabel}" />
+                        <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="Nome" />
+                        <TextBlock Text="Hostname" Style="{StaticResource FieldLabel}" />
+                        <TextBox Text="{Binding Hostname, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="Hostname" />
+                        <TextBlock Text="Setor" Style="{StaticResource FieldLabel}" />
+                        <TextBox Text="{Binding Sector, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="Setor" />
+                        <TextBlock Text="Local" Style="{StaticResource FieldLabel}" />
+                        <TextBox Text="{Binding Location, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="Local" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="Fabricante" Style="{StaticResource FieldLabel}" />
+                        <TextBox Text="{Binding Manufacturer, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="Fabricante" />
+                        <TextBlock Text="Modelo" Style="{StaticResource FieldLabel}" />
+                        <TextBox Text="{Binding Model, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="Modelo" />
+                        <TextBlock Text="Número de série" Style="{StaticResource FieldLabel}" />
+                        <TextBox Text="{Binding SerialNumber, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="Número de série" />
+                        <TextBlock Text="Situação" Style="{StaticResource FieldLabel}" />
+                        <ComboBox ItemsSource="{Binding Lifecycles}" SelectedValuePath="Value" DisplayMemberPath="Text"
+                                  SelectedValue="{Binding Lifecycle}" AutomationProperties.Name="Situação" />
+                        <TextBlock Text="Franquia mensal de páginas (opcional)" Style="{StaticResource FieldLabel}" />
+                        <TextBox Text="{Binding MonthlyFranchisePages, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="Franquia mensal de páginas" />
+                    </StackPanel>
+                </Grid>
+
+                <TextBlock Text="SNMP" Style="{StaticResource SectionTitle}" Margin="0,20,0,0" />
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="16" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="Versão" Style="{StaticResource FieldLabel}" />
+                        <ComboBox ItemsSource="{Binding SnmpVersions}" SelectedValuePath="Value" DisplayMemberPath="Text"
+                                  SelectedValue="{Binding SnmpVersion}" AutomationProperties.Name="Versão SNMP" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="Porta" Style="{StaticResource FieldLabel}" />
+                        <TextBox Text="{Binding SnmpPort, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="Porta SNMP" />
+                    </StackPanel>
+                </Grid>
+
+                <StackPanel Visibility="{Binding IsV3, Converter={StaticResource InverseBoolToVisibility}}">
+                    <TextBlock Text="Comunidade" Style="{StaticResource FieldLabel}" />
+                    <TextBox Text="{Binding Community, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="Comunidade SNMP" />
+                </StackPanel>
+
+                <Grid Visibility="{Binding IsV3, Converter={StaticResource BoolToVisibility}}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="16" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="Usuário SNMPv3" Style="{StaticResource FieldLabel}" />
+                        <TextBox Text="{Binding V3UserName, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="Usuário SNMPv3" />
+                        <TextBlock Text="Autenticação" Style="{StaticResource FieldLabel}" />
+                        <ComboBox ItemsSource="{Binding AuthProtocols}" SelectedValuePath="Value" DisplayMemberPath="Text"
+                                  SelectedValue="{Binding V3AuthProtocol}" AutomationProperties.Name="Protocolo de autenticação" />
+                        <TextBlock Text="Senha de autenticação" Style="{StaticResource FieldLabel}" />
+                        <PasswordBox x:Name="AuthPasswordBox" AutomationProperties.Name="Senha de autenticação" />
+                        <TextBlock Text="Deixe em branco para manter a senha atual." Style="{StaticResource Muted}"
+                                   Visibility="{Binding HasStoredAuthPassword, Converter={StaticResource BoolToVisibility}}" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="Contexto (opcional)" Style="{StaticResource FieldLabel}" />
+                        <TextBox Text="{Binding V3ContextName, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="Contexto SNMPv3" />
+                        <TextBlock Text="Criptografia (privacidade)" Style="{StaticResource FieldLabel}" />
+                        <ComboBox ItemsSource="{Binding PrivProtocols}" SelectedValuePath="Value" DisplayMemberPath="Text"
+                                  SelectedValue="{Binding V3PrivProtocol}" AutomationProperties.Name="Protocolo de criptografia" />
+                        <TextBlock Text="Senha de criptografia" Style="{StaticResource FieldLabel}" />
+                        <PasswordBox x:Name="PrivPasswordBox" AutomationProperties.Name="Senha de criptografia" />
+                        <TextBlock Text="Deixe em branco para manter a senha atual." Style="{StaticResource Muted}"
+                                   Visibility="{Binding HasStoredPrivPassword, Converter={StaticResource BoolToVisibility}}" />
+                    </StackPanel>
+                </Grid>
+
+                <Expander Header="Opções avançadas" Margin="0,16,0,0">
+                    <StackPanel Margin="0,4,0,0">
+                        <TextBlock Text="Intervalo próprio de varredura em minutos (vazio = usar o global; mínimo 15)" Style="{StaticResource FieldLabel}" />
+                        <TextBox Text="{Binding PollIntervalMinutes, UpdateSourceTrigger=PropertyChanged}" Width="120" HorizontalAlignment="Left"
+                                 AutomationProperties.Name="Intervalo de varredura em minutos" />
+                        <TextBlock Text="OID do contador mono (opcional, MIB do fabricante)" Style="{StaticResource FieldLabel}" />
+                        <TextBox Text="{Binding MonoCounterOid, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="OID do contador mono" />
+                        <TextBlock Text="OID do contador colorido (opcional)" Style="{StaticResource FieldLabel}" />
+                        <TextBox Text="{Binding ColorCounterOid, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="OID do contador colorido" />
+                    </StackPanel>
+                </Expander>
+
+                <Border Style="{StaticResource Card}" Margin="0,16,0,0" Background="{StaticResource PanelBg}"
+                        Visibility="{Binding TestResult, Converter={StaticResource NullToCollapsed}}">
+                    <StackPanel>
+                        <TextBlock Text="Resultado do teste de conexão" FontWeight="SemiBold" Margin="0,0,0,6" />
+                        <TextBlock Text="{Binding TestResult}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+    </DockPanel>
+</Window>
