@@ -1,126 +1,30 @@
-# Ferramentas de Impressoras
+# Utilitário de Impressoras
 
-Windows 10/11 · .NET 8 · WPF · MVVM
+**Versão 3.0** · Windows 10/11 · .NET 8 · WPF · MVVM
 
-Dois aplicativos desktop para cuidar de impressoras em ambientes corporativos: um para **encontrar, diagnosticar e configurar** impressoras, e outro para **monitorar o parque continuamente** (suprimentos, peças, contadores e alertas).
+Ferramenta para descoberta, diagnóstico e configuração de impressoras (com foco em impressoras térmicas e de rede) em ambientes corporativos. Ao abrir, já mostra as impressoras instaladas no computador; ao varrer, encontra novas na rede e permite alterar IP, gerenciar filas, instalar drivers e mais.
 
-| | Utilitário de Impressoras | Gestão de Impressoras |
-|---|---|---|
-| **Versão** | 3.0 | 1.0 |
-| **Para que serve** | Ações pontuais: descobrir impressoras, alterar IP, filas, spooler, drivers, porta USB | Acompanhamento diário: níveis de toner, desgaste de peças, contadores para faturamento, alertas e manutenções |
-| **Uso típico** | Técnico em atendimento, instalação ou suporte | Gestor ou equipe técnica que cuida do parque |
-| **Dados** | Arquivos JSON por usuário (`%AppData%`) | Banco SQLite compartilhado na máquina (`%ProgramData%`) |
-| **Usuários e senhas** | Não | Sim (Administrador, Técnico, Visualizador) |
-| **Projeto** | [`src/PrinterScanner.App`](src/PrinterScanner.App) | [`src/PrinterManager.App`](src/PrinterManager.App) |
-| **Distribuição** | Portátil (exe único) ou instalador | Instalador |
-
-Os dois são independentes e podem ser instalados na mesma máquina.
+> O monitoramento contínuo de suprimentos, peças e contadores (Gestão de Impressoras) agora é um projeto separado: **ImpGest**.
 
 ---
 
 ## Sumário
 
+- [Funcionalidades](#funcionalidades)
+- [Alterar IP — protocolos suportados](#alterar-ip--protocolos-suportados)
+- [Identificação via SNMP](#identificação-via-snmp)
 - [Compilar e publicar](#compilar-e-publicar)
 - [Estrutura do repositório](#estrutura-do-repositório)
-- [Utilitário de Impressoras](#utilitário-de-impressoras)
-  - [Funcionalidades](#funcionalidades)
-  - [Alterar IP — protocolos suportados](#alterar-ip--protocolos-suportados)
-  - [Identificação via SNMP](#identificação-via-snmp)
-  - [Como usar](#como-usar)
-  - [Configurações e colunas](#configurações-e-colunas)
-- [Gestão de Impressoras](#gestão-de-impressoras)
-  - [Funcionalidades](#funcionalidades-1)
-  - [Instalação e primeiro acesso](#instalação-e-primeiro-acesso)
-  - [Perfis de acesso](#perfis-de-acesso)
-  - [Regras de alerta e monitoramento](#regras-de-alerta-e-monitoramento)
-  - [Dados, backup e auditoria](#dados-backup-e-auditoria)
+- [Como usar](#como-usar)
+- [Configurações e colunas](#configurações-e-colunas)
 - [Dependências](#dependências)
 - [Privacidade](#privacidade)
 
 ---
 
-## Compilar e publicar
+## Funcionalidades
 
-**Pré-requisitos:** Windows 10/11 64-bit e o [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0). Para rodar os apps sem instalador é preciso o .NET 8 Desktop Runtime; os instaladores baixam o runtime quando ele falta.
-
-### Compilar
-
-```powershell
-dotnet build src\PrinterScanner.App\PrinterScanner.App.csproj -c Release   # Utilitário
-dotnet build src\PrinterManager.App\PrinterManager.App.csproj -c Release   # Gestão
-```
-
-### Publicar
-
-```powershell
-# Utilitário de Impressoras
-powershell -ExecutionPolicy Bypass -File scripts\publish-portable.ps1
-powershell -ExecutionPolicy Bypass -File scripts\publish-installer.ps1
-
-# Gestão de Impressoras
-powershell -ExecutionPolicy Bypass -File scripts\publish-gestao-installer.ps1
-```
-
-Resultados:
-
-```
-publish\win-x64-portable\
-└── PrinterScanner.exe            ← Utilitário portátil, sem dependências (~11 MB)
-
-publish\win-x64-installer\
-└── PrinterScanner-Setup.exe      ← Utilitário: instalador com runtime e utilitários (~72 MB)
-
-publish\gestao-win-x64-installer\
-└── GestaoImpressoras-Setup.exe   ← Gestão: instalador (~45 MB)
-```
-
-> Depois de alterar o código do Utilitário, execute os dois scripts dele para manter as versões portátil e instalável iguais.
-
----
-
-## Estrutura do repositório
-
-```
-├── README.md
-├── docs/
-│   ├── arquitetura.md                   # Arquitetura do Utilitário
-│   └── gestao-impressoras.md            # Gestão: requisitos mapeados para o código
-├── scripts/
-│   ├── publish-portable.ps1             # Utilitário portátil
-│   ├── publish-installer.ps1            # Utilitário instalador
-│   ├── publish-gestao-installer.ps1     # Gestão instalador
-│   └── clean-cache.ps1                  # Limpa caches de build
-└── src/
-    ├── PrinterScanner.App/              # Utilitário de Impressoras (WPF)
-    │   ├── Infrastructure/              # ObservableObject, RelayCommand, BindingProxy
-    │   ├── Models/                      # PrinterDevice, ScanRequest, AppSettings…
-    │   ├── Resources/Themes/            # Tema claro e escuro
-    │   ├── Services/                    # Varredura, SNMP, alteração de IP, fila/spooler, drivers
-    │   ├── ViewModels/
-    │   └── Views/                       # Ações, alterar IP, porta USB, utilitários
-    ├── PrinterScanner.Launcher/         # Executável portátil (extrai e roda o app embutido)
-    ├── PrinterScanner.Installer/        # Instalador do Utilitário
-    ├── PrinterManager.App/              # Gestão de Impressoras (WPF + SQLite)
-    │   ├── Data/                        # DbContext EF Core e inicialização do banco
-    │   ├── Infrastructure/              # MVVM, comandos assíncronos, conversores
-    │   ├── Models/                      # Impressora, suprimento, peça, alerta, auditoria…
-    │   ├── Resources/                   # Tema, estilos e ícone
-    │   ├── Services/                    # SNMP, agendador, alertas, notificações, relatórios,
-    │   │                                # backup, auditoria e usuários
-    │   ├── ViewModels/
-    │   └── Views/                       # Painel, impressoras, descoberta, alertas, relatórios…
-    └── PrinterManager.Installer/        # Instalador do Gestão
-```
-
----
-
-## Utilitário de Impressoras
-
-Ao abrir, já mostra as impressoras USB e de rede instaladas no Windows. Ao varrer, encontra novas impressoras na rede e permite alterar IP, gerenciar filas, instalar drivers e mais.
-
-### Funcionalidades
-
-#### Descoberta
+### Descoberta
 
 | Funcionalidade | Descrição |
 |---|---|
@@ -133,7 +37,7 @@ Ao abrir, já mostra as impressoras USB e de rede instaladas no Windows. Ao varr
 | **Endereço MAC** | Lido da tabela ARP local |
 | **Filtro em tempo real** | Busca por IP, nome, MAC ou descrição |
 
-#### Status, fila e spooler
+### Status, fila e spooler
 
 | Funcionalidade | Descrição |
 |---|---|
@@ -144,7 +48,7 @@ Ao abrir, já mostra as impressoras USB e de rede instaladas no Windows. Ao varr
 | **Pausar / retomar fila** | Via WMI (`Win32_Printer.Pause/Resume`) |
 | **Reiniciar Spooler** | Para o serviço, apaga `%SystemRoot%\System32\spool\PRINTERS\*.*` e reinicia (UAC) |
 
-#### Rede, impressão e driver
+### Rede, impressão e driver
 
 | Funcionalidade | Descrição |
 |---|---|
@@ -154,7 +58,7 @@ Ao abrir, já mostra as impressoras USB e de rede instaladas no Windows. Ao varr
 | **Compartilhar na rede** | Ativa ou remove o compartilhamento; avisa quando falta driver |
 | **Alterar porta USB** | Move a impressora para outra porta (USB001, USB002…) sem reinstalar o driver |
 
-#### Personalização
+### Personalização
 
 | Funcionalidade | Descrição |
 |---|---|
@@ -164,7 +68,7 @@ Ao abrir, já mostra as impressoras USB e de rede instaladas no Windows. Ao varr
 | **Tema claro / escuro** | Alternância instantânea, salva entre sessões |
 | **Utilitários** | Acesso a ferramentas externas de diagnóstico e configuração |
 
-### Alterar IP — protocolos suportados
+## Alterar IP — protocolos suportados
 
 O protocolo é detectado pelo nome do dispositivo e pode ser escolhido manualmente.
 
@@ -183,7 +87,7 @@ O protocolo é detectado pelo nome do dispositivo e pode ser escolhido manualmen
 | `epson`, `elgin`, `tm-` | ESC/POS GS(N) |
 | outros | Automático |
 
-### Identificação via SNMP
+## Identificação via SNMP
 
 **Modelo do dispositivo** (em ordem de prioridade):
 
@@ -210,7 +114,60 @@ O protocolo é detectado pelo nome do dispositivo e pode ser escolhido manualmen
 
 A consulta tenta SNMPv2c com todos os OIDs de uma vez, depois SNMPv1 e, por último, um OID por vez para equipamentos que rejeitam GET com vários OIDs.
 
-### Como usar
+---
+
+## Compilar e publicar
+
+**Pré-requisitos:** Windows 10/11 64-bit e o [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0). O portátil não precisa de nada instalado; para rodar o app diretamente é preciso o [.NET 8 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/8.0).
+
+```powershell
+# Compilar
+dotnet build src\PrinterScanner.App\PrinterScanner.App.csproj -c Release
+
+# Publicar
+powershell -ExecutionPolicy Bypass -File scripts\publish-portable.ps1
+powershell -ExecutionPolicy Bypass -File scripts\publish-installer.ps1
+```
+
+Resultados:
+
+```
+publish\win-x64-portable\
+└── PrinterScanner.exe          ← executável portátil, sem dependências (~11 MB)
+
+publish\win-x64-installer\
+└── PrinterScanner-Setup.exe    ← instalador com runtime .NET 8 e utilitários (~72 MB)
+```
+
+> Depois de qualquer alteração de código, execute os dois scripts para manter as versões portátil e instalável iguais.
+
+---
+
+## Estrutura do repositório
+
+```
+├── README.md
+├── docs/
+│   └── arquitetura.md               # Arquitetura e mapeamento de requisitos
+├── scripts/
+│   ├── publish-portable.ps1         # Gera o executável portátil
+│   ├── publish-installer.ps1        # Gera o instalador
+│   └── clean-cache.ps1              # Limpa caches de build
+└── src/
+    ├── PrinterScanner.App/          # Aplicativo WPF
+    │   ├── Infrastructure/          # ObservableObject, RelayCommand, BindingProxy
+    │   ├── Models/                  # PrinterDevice, ScanRequest, AppSettings…
+    │   ├── Resources/Themes/        # Tema claro e escuro
+    │   ├── Services/                # Varredura, SNMP, alteração de IP, fila/spooler, drivers
+    │   ├── ViewModels/
+    │   └── Views/                   # Ações, alterar IP, porta USB, utilitários
+    ├── PrinterScanner.Launcher/     # Executável portátil (extrai e roda o app embutido)
+    └── PrinterScanner.Installer/    # Instalador
+```
+
+---
+
+## Como usar
 
 1. **Tela inicial:** as impressoras USB e de rede instaladas aparecem automaticamente.
 2. **Interface de rede:** escolha a placa ligada à rede das impressoras. Use **Atualizar redes** depois de conectar ou desconectar uma VPN.
@@ -223,7 +180,9 @@ A consulta tenta SNMPv2c com todos os OIDs de uma vez, depois SNMPv1 e, por últ
 9. **Compartilhar:** botão direito → **Compartilhar na Rede**.
 10. **Relatório:** **Ações → Salvar Relatório** gera um `.txt` em `C:\`.
 
-### Configurações e colunas
+---
+
+## Configurações e colunas
 
 Dados em `%AppData%\PrinterScannerApp\`:
 
@@ -256,105 +215,16 @@ Dados em `%AppData%\PrinterScannerApp\`:
 
 ---
 
-## Gestão de Impressoras
-
-Monitora o parque continuamente via SNMP e avisa a equipe antes que falte toner ou que uma peça quebre. Roda localmente na máquina, sem servidor web.
-
-Documentação completa, com cada requisito mapeado para o código: [docs/gestao-impressoras.md](docs/gestao-impressoras.md).
-
-### Funcionalidades
-
-| Tela | O que faz |
-|---|---|
-| **Painel** | Saúde de todas as impressoras: status, níveis CMYK, peça mais desgastada, contador e alertas; indicadores de online, offline e licenças em uso; filtro por setor |
-| **Impressoras** | Lista com busca por nome, IP, série ou local e filtros por status, situação, setor e modelo; cadastro, edição, exclusão e atualização sob demanda |
-| **Detalhes da impressora** | Suprimentos, peças de desgaste (com troca/reset), erros do firmware, histórico de contadores, manutenções e alertas |
-| **Descoberta na rede** | Varredura por faixa de IP ou CIDR via SNMP (v1, v2c ou v3) e cadastro em lote das encontradas |
-| **Alertas** | Alertas ativos e resolvidos, com reconhecimento por técnico |
-| **Manutenções** | Histórico de serviços e trocas de peças por impressora e período |
-| **Relatórios** | Consumo de suprimentos, contadores de páginas, franquia mensal e manutenções, exportados em **PDF** e **CSV** |
-| **Auditoria** | Registro de acessos e alterações, com verificação de integridade |
-| **Usuários** | Cadastro, perfis, redefinição de senha e desbloqueio |
-| **Configurações** | Limiares de alerta, agendamento, SNMP padrão, e-mail, webhooks e backup |
-
-Outros pontos:
-
-- **SNMP v1, v2c e v3**, com autenticação MD5/SHA-1/SHA-2 e criptografia DES/3DES/AES-128/192/256.
-- **Teste de conexão** (ping + SNMP) ao cadastrar ou editar, preenchendo modelo, série e hostname automaticamente.
-- **Erros do firmware** lidos da Printer-MIB e Host-Resources-MIB (porta aberta, atolamento, sem papel, serviço solicitado…).
-- **Notificações** por e-mail (SMTP com SSL/TLS) e webhooks HTTPS compatíveis com Teams, Slack e Google Chat.
-
-### Instalação e primeiro acesso
-
-1. Gere o instalador com `scripts\publish-gestao-installer.ps1` (ver [Compilar e publicar](#compilar-e-publicar)).
-2. Execute `GestaoImpressoras-Setup.exe` como administrador. Ele instala o .NET 8 Desktop Runtime se necessário, instala em `C:\Program Files\Gestao de Impressoras` e cria atalhos na Área de Trabalho e no Menu Iniciar.
-3. No primeiro acesso, o app pede a criação do usuário **Administrador**.
-4. Cadastre as impressoras em **Impressoras → Nova impressora** ou pela **Descoberta na rede**.
-
-Para atualizar, basta executar um instalador mais novo: ele fecha o app aberto e preserva os dados. A desinstalação também mantém os dados.
-
-### Perfis de acesso
-
-| Ação | Administrador | Técnico | Visualizador |
-|---|:-:|:-:|:-:|
-| Ver painel, impressoras, alertas e relatórios | ✔ | ✔ | ✔ |
-| Cadastrar e editar impressoras, registrar manutenções, reconhecer alertas | ✔ | ✔ | — |
-| Resetar contador de peça após troca física | ✔ | ✔ | — |
-| Excluir impressora | com senha de Administrador | com senha de Administrador | — |
-| Usuários, configurações globais, auditoria e backup | ✔ | — | — |
-
-Senhas armazenadas com bcrypt. Após 5 tentativas incorretas seguidas o usuário fica bloqueado por 15 minutos (o Administrador pode desbloquear).
-
-### Regras de alerta e monitoramento
-
-| Regra | Comportamento |
-|---|---|
-| **Suprimento crítico** | Toner ou tinta com 5% ou menos gera alerta crítico (limiar configurável) |
-| **Desgaste de peça** | Peça com 90% ou mais da vida útil gera alerta preventivo de troca |
-| **Cálculo do desgaste** | Páginas impressas desde a última troca ÷ vida útil nominal do fabricante |
-| **Peças padrão** | Unidade de fusão (100.000), rolo de transferência (120.000) e rolos de alimentação (50.000), ajustáveis por impressora |
-| **Varredura automática** | Intervalo global ou por impressora, nunca menor que 15 minutos |
-| **Offline** | 3 tentativas consecutivas sem resposta SNMP marcam a impressora como Offline |
-| **Notificações** | Disparadas logo após a varredura que confirmou o alerta; falhas são reenviadas a cada minuto |
-| **Impressoras inativas ou descartadas** | Não são consultadas, não geram alertas e não contam como licença |
-| **Exclusão** | Exige senha de Administrador e é lógica: o histórico continua nos relatórios |
-| **Franquia mensal** | No primeiro dia útil do mês o período anterior é fechado por impressora e o acumulado recomeça |
-| **Contadores mono/cor** | O total vem da Printer-MIB; mono/cor usam o perfil HP embutido ou OIDs informados no cadastro (*Opções avançadas*) |
-
-### Dados, backup e auditoria
-
-| Item | Local |
-|---|---|
-| Banco de dados | `%ProgramData%\GestaoImpressoras\gestao.db` |
-| Backups diários | `%ProgramData%\GestaoImpressoras\Backups` (pasta configurável; recomenda-se uma pasta de rede) |
-| Logs técnicos | `%ProgramData%\GestaoImpressoras\Logs` |
-
-- **Banco compartilhado:** todos os usuários do Windows da máquina usam o mesmo banco; o grupo *Usuários* recebe permissão de gravação na pasta.
-- **Uma instância por máquina:** impede duas varreduras simultâneas sobre o mesmo banco.
-- **Backup diário automático** com retenção configurável e **restauração** em *Configurações* (uma cópia do banco atual é feita antes).
-- **Auditoria imutável:** alterações e exclusões na tabela de auditoria são bloqueadas no banco e cada registro é encadeado por hash SHA-256. Mudanças nos limiares de alerta são registradas com data e ID do usuário. Não há expurgo, assim como no histórico de contadores.
-- **Segredos** (senhas SNMPv3 e SMTP) criptografados com DPAPI da máquina.
-
-O monitoramento roda enquanto o app está aberto; fechar a janela interrompe as varreduras.
-
----
-
 ## Dependências
 
-| Pacote | Versão | Usado por | Uso |
-|---|---|---|---|
-| `Lextm.SharpSnmpLib` | 12.5.7 | Ambos | SNMP (v1/v2c no Utilitário; v1/v2c/v3 no Gestão) |
-| `Microsoft.EntityFrameworkCore.Sqlite` | 8.0.11 | Gestão | Banco de dados local |
-| `BCrypt.Net-Next` | 4.0.3 | Gestão | Hash de senhas |
-| `QuestPDF` | 2024.10.2 | Gestão | Relatórios em PDF |
-| `System.Security.Cryptography.ProtectedData` | 8.0.0 | Gestão | Criptografia de segredos (DPAPI) |
-
-> O QuestPDF usa a licença *Community*, gratuita para empresas com receita anual abaixo de US$ 1 milhão. Acima disso é necessária licença comercial.
+| Pacote | Versão | Uso |
+|---|---|---|
+| `Lextm.SharpSnmpLib` | 12.5.7 | Consultas SNMP v1/v2c |
 
 ---
 
 ## Privacidade
 
-- **Utilitário:** nomes, descrições e preferências ficam em `%AppData%\PrinterScannerApp`. Não há comunicação com servidores externos; a varredura ocorre só na rede definida pelo usuário.
-- **Gestão:** os dados ficam no banco local em `%ProgramData%\GestaoImpressoras`. A única comunicação externa são as notificações por e-mail e webhook, quando o Administrador as configura.
-- Os logs de ambos são gravados apenas localmente.
+- Nomes, descrições e preferências ficam em `%AppData%\PrinterScannerApp`.
+- O aplicativo **não se comunica com servidores externos**; a varredura ocorre só na rede definida pelo usuário.
+- Logs de erro são gravados apenas localmente.
