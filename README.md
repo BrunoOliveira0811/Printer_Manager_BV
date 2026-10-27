@@ -4,7 +4,7 @@
 
 Ferramenta para descoberta, diagnóstico e configuração de impressoras (com foco em impressoras térmicas e de rede) em ambientes corporativos. Ao abrir, já mostra as impressoras instaladas no computador; ao varrer, encontra novas na rede e permite alterar IP, gerenciar filas, instalar drivers e mais.
 
-> O monitoramento contínuo de suprimentos, peças e contadores (Gestão de Impressoras) agora é um projeto separado: **ImpGest**.
+> O monitoramento contínuo de suprimentos, peças e contadores (Gestão de Impressoras) agora é um projeto separado: **[ImpGest](https://github.com/BrunoOliveira0811/ImpGest)**.
 
 ---
 
